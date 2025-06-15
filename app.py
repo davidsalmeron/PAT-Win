@@ -1,7 +1,7 @@
 import os
 import tempfile
 import streamlit as st
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import TextLoader, PyMuPDFLoader, UnstructuredWordDocumentLoader
@@ -42,7 +42,7 @@ if uploaded_files:
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     docs = text_splitter.split_documents(all_docs)
 
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(docs, embeddings)
 
     retriever = db.as_retriever()
