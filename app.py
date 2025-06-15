@@ -46,15 +46,21 @@ if uploaded_files:
 
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     docs = text_splitter.split_documents(all_docs)
-
+    
+    texts = [doc.page_content for doc in docs]
+    
     embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
-    db = FAISS.from_documents(docs, embeddings)
-
+    db = FAISS.from_texts(texts, embeddings)
+    
     retriever = db.as_retriever()
     llm = OpenAI(temperature=0)
     qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
-
+    
     query = st.text_input("Hazme una pregunta:")
     if query:
-        answer = qa_chain.run(query)
-        st.write("Respuesta:", answer)
+        try:
+            answer = qa_chain.run(query)
+            st.write("Respuesta:", answer)
+        except Exception as e:
+            st.error(f"Error al obtener respuesta: {e}")
+
