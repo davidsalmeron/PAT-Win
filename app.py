@@ -43,7 +43,7 @@ if uploaded_files:
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     docs = text_splitter.split_documents(all_docs)
 
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
     db = FAISS.from_documents(docs, embeddings)
 
     retriever = db.as_retriever()
