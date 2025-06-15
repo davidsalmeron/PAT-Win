@@ -1,5 +1,5 @@
 streamlit
-langchain
+langchain==0.0.310
 openai
 faiss-cpu
 sentence-transformers
