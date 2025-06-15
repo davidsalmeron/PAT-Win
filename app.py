@@ -9,6 +9,10 @@ from langchain.document_loaders import TextLoader, PyMuPDFLoader, UnstructuredWo
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 
+# Inyección manual para evitar error con openai.error.Timeout
+import langchain.embeddings.openai as lc_openai
+lc_openai.openai = openai
+
 st.title("Asistente PAT-Win")
 
 uploaded_files = st.file_uploader(
@@ -47,7 +51,7 @@ if uploaded_files:
     db = FAISS.from_documents(docs, embeddings)
 
     retriever = db.as_retriever()
-    llm = OpenAI(temperature=0)  # Usa la clave desde secrets
+    llm = OpenAI(temperature=0)
     qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
 
     query = st.text_input("Hazme una pregunta:")
