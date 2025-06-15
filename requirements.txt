@@ -1,6 +1,7 @@
 streamlit
 langchain==0.0.310
 openai
+tiktoken
 faiss-cpu
 PyMuPDF
 python-docx
