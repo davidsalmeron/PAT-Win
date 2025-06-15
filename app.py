@@ -8,7 +8,7 @@ from langchain.document_loaders import TextLoader, PyMuPDFLoader, UnstructuredWo
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 
-st.title("Asistente IA local con documentación")
+st.title("Asistente PAT-Win")
 
 uploaded_files = st.file_uploader(
     "Sube uno o varios documentos (.txt, .pdf, .docx)",
@@ -46,9 +46,10 @@ if uploaded_files:
     db = FAISS.from_documents(docs, embeddings)
 
     retriever = db.as_retriever()
-    qa_chain = RetrievalQA.from_chain_type(llm=OpenAI(temperature=0), retriever=retriever)
+    llm = OpenAI(temperature=0)  # Usa la clave desde secrets
+    qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
 
-    query = st.text_input("Haz una pregunta sobre los documentos:")
+    query = st.text_input("Hazme una pregunta:")
     if query:
         answer = qa_chain.run(query)
         st.write("Respuesta:", answer)
