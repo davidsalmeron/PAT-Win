@@ -2,8 +2,6 @@ streamlit
 langchain==0.0.310
 openai
 faiss-cpu
-sentence-transformers==2.2.2
-torch==2.7.1
 PyMuPDF
 python-docx
 unstructured
