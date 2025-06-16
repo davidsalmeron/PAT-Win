@@ -2,6 +2,9 @@ import openai
 import os
 import tempfile
 import streamlit as st
+# Inyección manual para evitar error con openai.error.Timeout
+import langchain.embeddings.openai as lc_openai
+lc_openai.openai = openai
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -9,9 +12,6 @@ from langchain.document_loaders import TextLoader, PyMuPDFLoader, UnstructuredWo
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 
-# Inyección manual para evitar error con openai.error.Timeout
-import langchain.embeddings.openai as lc_openai
-lc_openai.openai = openai
 
 st.title("Asistente PAT-Win")
 
