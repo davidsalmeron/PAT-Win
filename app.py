@@ -2,16 +2,16 @@ import openai
 import os
 import tempfile
 import streamlit as st
-# Inyección manual para evitar error con openai.error.Timeout
 import langchain.embeddings.openai as lc_openai
 lc_openai.openai = openai
+
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import TextLoader, PyMuPDFLoader, UnstructuredWordDocumentLoader
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-
+from langchain.prompts import PromptTemplate
 
 st.title("Asistente PAT-Win")
 
@@ -44,31 +44,56 @@ if uploaded_files:
         all_docs.extend(documents)
         os.remove(tmp_path)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
     docs = text_splitter.split_documents(all_docs)
-    
     texts = [doc.page_content for doc in docs]
 
     embeddings = OpenAIEmbeddings(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         model="text-embedding-ada-002",
         request_timeout=30
-    )    
+    )
     db = FAISS.from_texts(texts, embeddings)
-    
-    retriever = db.as_retriever()
+    retriever = db.as_retriever(search_kwargs={"k": 4})
+
     llm = ChatOpenAI(
         model_name="gpt-4",
         temperature=0,
         openai_api_key=os.getenv("OPENAI_API_KEY")
     )
-    qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
-    
+
+    # Prompt personalizado
+    prompt_template = """
+Eres un asistente experto que responde preguntas basándote únicamente en el siguiente contexto. 
+Si no encuentras la respuesta en el contexto, responde con "No tengo suficiente información para responder eso".
+
+Contexto:
+{context}
+
+Pregunta:
+{question}
+"""
+    prompt = PromptTemplate(
+        input_variables=["context", "question"],
+        template=prompt_template
+    )
+
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
+        retriever=retriever,
+        chain_type="stuff",
+        chain_type_kwargs={"prompt": prompt},
+        return_source_documents=True
+    )
+
     query = st.text_input("Hazme una pregunta:")
     if query:
         try:
-            answer = qa_chain.run(query)
-            st.write("Respuesta:", answer)
+            result = qa_chain(query)
+            st.write("Respuesta:", result["result"])
+
+            with st.expander("Ver contexto utilizado"):
+                for i, doc in enumerate(result["source_documents"]):
+                    st.markdown(f"**Fragmento {i+1}:**\n{doc.page_content}")
         except Exception as e:
             st.error(f"Error al obtener respuesta: {e}")
-
