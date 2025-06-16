@@ -57,7 +57,7 @@ if uploaded_files:
     db = FAISS.from_texts(texts, embeddings)
     
     retriever = db.as_retriever()
-    llm = OpenAI(temperature=0)
+    llm = OpenAI(model_name="gpt-3.5-turbo-instruct", temperature=0)
     qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
     
     query = st.text_input("Hazme una pregunta:")
