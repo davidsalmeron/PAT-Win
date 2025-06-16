@@ -10,7 +10,7 @@ from langchain.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import TextLoader, PyMuPDFLoader, UnstructuredWordDocumentLoader
 from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 
 
 st.title("Asistente PAT-Win")
@@ -57,7 +57,11 @@ if uploaded_files:
     db = FAISS.from_texts(texts, embeddings)
     
     retriever = db.as_retriever()
-    llm = OpenAI(model_name="gpt-3.5-turbo-instruct", temperature=0)
+    llm = ChatOpenAI(
+        model_name="gpt-3.5-turbo",
+        temperature=0,
+        openai_api_key=os.getenv("OPENAI_API_KEY")
+    )
     qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
     
     query = st.text_input("Hazme una pregunta:")
