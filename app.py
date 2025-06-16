@@ -48,8 +48,12 @@ if uploaded_files:
     docs = text_splitter.split_documents(all_docs)
     
     texts = [doc.page_content for doc in docs]
-    
-    embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
+
+    embeddings = OpenAIEmbeddings(
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        model="text-embedding-ada-002",
+        request_timeout=30
+    )    
     db = FAISS.from_texts(texts, embeddings)
     
     retriever = db.as_retriever()
